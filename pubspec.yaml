@@ -1,0 +1,19 @@
+name: htmltodart_jaspr
+description: A sample command-line application.
+version: 1.0.0
+# repository: https://github.com/my_org/my_repo
+environment:
+  sdk: ^3.4.1
+
+# Add regular dependencies here.
+dependencies:
+  dart_style: ^2.3.6
+  html: ^0.15.4
+  js: ^0.7.1
+  shelf: ^1.4.2
+  shelf_static: ^1.1.2
+  web: ^1.0.0
+# path: ^1.8.0
+dev_dependencies:
+  lints: ^3.0.0
+  test: ^1.24.0
