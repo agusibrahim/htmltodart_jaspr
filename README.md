@@ -42,13 +42,13 @@ To compile the Dart script to WebAssembly:
    make
    ```
 
-   This will generate a `jasprconverter.wasm` file inside the `web` directory.
+   This will generate a `jasprconverter.wasm` file inside the `docs` directory.
 
 3. The generated WebAssembly file can then be used within the web application to perform the HTML to Dart conversion.
 
 ### Running the Web Application
 
-You can serve the `web` directory using any static file server or deploy it as a GitHub Pages site.
+You can serve the `docs` directory using any static file server or deploy it as a GitHub Pages site.
 
 ### Usage
 
