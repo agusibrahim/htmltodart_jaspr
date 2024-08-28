@@ -131,21 +131,11 @@
         const currentContent = editorHtml.getValue();
         localStorage.setItem(LOCAL_STORAGE_KEY, currentContent);
     });
-    function validateHtml(html) {
-        try {
-            const handler = new htmlparser2.DomHandler();
-            const parser = new htmlparser2.Parser(handler);
-            parser.write(html);
-            parser.end();
-            return true;
-        } catch (error) {
-            return false;
-        }
-    }
+    
     // Add event listener for the convert button
     document.getElementById('convert-btn').addEventListener('click', function() {
       const htmlCode = editorHtml.getValue();
-      // Here, implement the logic to convert HTML to Dart
+      // validate html
       const annotations = editorHtml.session.getAnnotations();
       const hasErrors = annotations.some(annotation => annotation.type === 'error');
 
@@ -153,6 +143,7 @@
           alert("HTML syntax is not valid.");
           return;
       }
+      // Here, implement the logic to convert HTML to Dart
       convertToJaspr(htmlCode, (dartCode)=>{
         editorDart.setValue(dartCode);
         editorDart.focus();
