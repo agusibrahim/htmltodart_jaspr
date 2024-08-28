@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTML to Dart Converter</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+    }
+
+    header {
+      width: 100%;
+      text-align: center;
+      padding: 10px;
+      background-color: #333;
+      color: white;
+    }
+
+    #editor-html,
+    #editor-dart {
+      width: 100%;
+      height: calc(100% - 30px);
+    }
+
+    h2 {
+      text-align: center;
+      margin: 0;
+      background-color: #333;
+      color: white;
+      height: 30px;
+      line-height: 30px;
+    }
+
+    #convert-btn {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 50px;
+      height: 50px;
+      background-color: #007bff;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 10;
+      transition: background-color 0.3s;
+    }
+
+    #convert-btn:hover {
+      background-color: #0056b3;
+    }
+
+    .editor-container {
+      width: 50%;
+      height: 100%;
+      position: relative;
+    }
+
+    .editors {
+      display: flex;
+      width: 100%;
+      height: calc(100% - 60px);
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.14/ace.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.14.0/beautify-html.min.js"></script>
+  <script src="main.js"></script>
+</head>
+
+<body>
+
+  <!-- Header Title -->
+  <header>
+    <h1>HTML to Dart Converter</h1>
+  </header>
+
+  <div class="editors">
+    <!-- HTML Editor Container -->
+    <div class="editor-container">
+      <h2>HTML Input</h2>
+      <div id="editor-html"></div>
+    </div>
+
+    <!-- Dart Editor Container -->
+    <div class="editor-container">
+      <h2>Result</h2>
+      <div id="editor-dart"></div>
+    </div>
+  </div>
+
+  <!-- Convert Button -->
+  <button id="convert-btn">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M8 5V19L19 12L8 5Z" fill="white" />
+    </svg>
+  </button>
+
+  <script>
+    const LOCAL_STORAGE_KEY = 'htmlEditorContent';
+    // Initialize Ace editors
+    const editorHtml = ace.edit("editor-html");
+    editorHtml.setTheme("ace/theme/monokai");
+    editorHtml.session.setMode("ace/mode/html");
+    const editorDart = ace.edit("editor-dart");
+    editorDart.setTheme("ace/theme/monokai");
+    editorDart.session.setMode("ace/mode/dart");
+    editorDart.setReadOnly(true);
+    // Add event listener for paste event to auto-format HTML
+    editorHtml.on("paste", function(e) {
+      const formattedHtml = html_beautify(e.text, {
+        indent_size: 2
+      });
+      e.text = formattedHtml;
+    });
+    document.addEventListener('DOMContentLoaded', () => {
+        const savedContent = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (savedContent) {
+            editorHtml.setValue(savedContent, -1); // -1 to move cursor to the start
+        }
+    });
+
+    // Save content to localStorage on change
+    editorHtml.session.on('change', function() {
+        const currentContent = editorHtml.getValue();
+        localStorage.setItem(LOCAL_STORAGE_KEY, currentContent);
+    });
+    function validateHtml(html) {
+        try {
+            const handler = new htmlparser2.DomHandler();
+            const parser = new htmlparser2.Parser(handler);
+            parser.write(html);
+            parser.end();
+            return true;
+        } catch (error) {
+            return false;
+        }
+    }
+    // Add event listener for the convert button
+    document.getElementById('convert-btn').addEventListener('click', function() {
+      const htmlCode = editorHtml.getValue();
+      // Here, implement the logic to convert HTML to Dart
+      const annotations = editorHtml.session.getAnnotations();
+      const hasErrors = annotations.some(annotation => annotation.type === 'error');
+
+      if (hasErrors) {
+          alert("HTML syntax is not valid.");
+          return;
+      }
+      convertToJaspr(htmlCode, (dartCode)=>{
+        editorDart.setValue(dartCode);
+        editorDart.focus();
+        editorDart.selectAll();
+      })
+    });
+  </script>
+</body>
+
+</html>

@@ -2,7 +2,7 @@
 
 # Variables
 DART_FILE=bin/htmltodart_jaspr.dart
-OUTPUT_DIR=web
+OUTPUT_DIR=docs
 OUTPUT_FILE=jasprconverter.wasm
 
 # Default target
