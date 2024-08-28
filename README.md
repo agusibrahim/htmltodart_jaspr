@@ -27,24 +27,21 @@ https://www.agusibrah.im/htmltodart_jaspr/
    cd htmltodart_jaspr
    ```
 
-2. Install dependencies (if any). For now, this project does not require any additional dependencies besides Dart.
+2. Install dependencies:
+   ```bash
+   dart pub get
+   ```
 
 ### Compiling to WebAssembly
 
 This project includes a Dart script (`bin/htmltodart_jaspr.dart`) that can be compiled into WebAssembly to power the converter. 
 
 To compile the Dart script to WebAssembly:
-
-1. Make sure you are in the root directory of the project.
-2. Use the provided `Makefile` to compile:
-
-   ```bash
-   make
-   ```
+```bash
+make
+```
 
    This will generate a `jasprconverter.wasm` file inside the `docs` directory.
-
-3. The generated WebAssembly file can then be used within the web application to perform the HTML to Dart conversion.
 
 ### Running the Web Application
 
