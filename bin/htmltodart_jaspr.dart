@@ -1,12 +1,8 @@
-import 'dart:convert';
 import 'dart:js_interop';
-import 'dart:typed_data';
 
 //import 'package:js/js.dart' as js;
 import 'package:dart_style/dart_style.dart';
 import 'package:htmltodart_jaspr/jaspr_html_convert.dart';
-import 'package:web/web.dart' as web;
-import 'package:web/web.dart';
 
 @JS()
 external set convertToJaspr(JSFunction fn);
