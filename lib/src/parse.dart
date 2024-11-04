@@ -68,22 +68,17 @@ class JasprConverter {
       }
     }
 
-    // Recursively convert nested DOM elements before handling text nodes
-    for (final child in e.children) {
-      out += _convertElement(child, source);
-    }
-
-    // Look for any inner text
-    if (e.hasChildNodes()) {
-      for (final node in e.nodes) {
-        if (node.nodeType == Node.TEXT_NODE && (node.text?.trim().isNotEmpty ?? false)) {
-          String value = node.text!.replaceAll('\n', '');
-          // Escape any invalid characters to avoid breaking the string
-          value = value.replaceAll(r'\', r'\\');
-          value = value.replaceAll(r"$", r"\$");
-          value = value.replaceAll(r"'", r"\'");
-          out += "text('$value'),";
-        }
+    // Process children and text nodes in the correct order
+    for (final node in e.nodes) {
+      if (node.nodeType == Node.TEXT_NODE && (node.text?.trim().isNotEmpty ?? false)) {
+        String value = node.text!.replaceAll('\n', '').trim();
+        // Escape any invalid characters to avoid breaking the string
+        value = value.replaceAll(r'\', r'\\');
+        value = value.replaceAll(r"$", r"\$");
+        value = value.replaceAll(r"'", r"\'");
+        out += "text('$value'),";
+      } else if (node is Element) {
+        out += _convertElement(node, source);
       }
     }
 
