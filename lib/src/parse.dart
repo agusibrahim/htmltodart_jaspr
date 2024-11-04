@@ -28,6 +28,7 @@ class JasprConverter {
 
     final doc = parse(source);
 
+    // Process each top-level child of the root element
     for (final element in doc.children.first.children) {
       output += _convertElement(element, source);
     }
@@ -42,35 +43,34 @@ class JasprConverter {
 
   String _convertElement(Element e, String source) {
     final eName = e.localName;
-
-    final c = components.firstWhereOrNull(
-      (c) => c.name == eName,
-    );
-
+    final c = components.firstWhereOrNull((c) => c.name == eName);
     final unSupportedComponent = c == null;
-
     final selfClosing = c?.selfClosing ?? false;
-
     final sourceContainsParent = source.contains('<$eName');
 
-    // Implies element added by parser and not actually in source
+    // Skip elements added by the parser that are not present in the source
     if (!sourceContainsParent && e.children.isEmpty) {
       return '';
     }
 
     String out = '';
 
-    // Handle elements that do not expect to have children
+    // Handle the opening of the element
     if (sourceContainsParent) {
       if (selfClosing) {
         out = '\n$eName(\n';
       } else {
         if (unSupportedComponent) {
-          out = "DomComponent(tag: '$eName',children: [";
+          out = "DomComponent(tag: '$eName', children: [";
         } else {
           out = '\n$eName([';
         }
       }
+    }
+
+    // Recursively convert nested DOM elements before handling text nodes
+    for (final child in e.children) {
+      out += _convertElement(child, source);
     }
 
     // Look for any inner text
@@ -78,7 +78,7 @@ class JasprConverter {
       for (final node in e.nodes) {
         if (node.nodeType == Node.TEXT_NODE && (node.text?.trim().isNotEmpty ?? false)) {
           String value = node.text!.replaceAll('\n', '');
-          // Escape any any invalid characters to avoid breaking the string
+          // Escape any invalid characters to avoid breaking the string
           value = value.replaceAll(r'\', r'\\');
           value = value.replaceAll(r"$", r"\$");
           value = value.replaceAll(r"'", r"\'");
@@ -87,21 +87,12 @@ class JasprConverter {
       }
     }
 
-    // Recursively convert nested DOM elements
-    for (final child in e.children) {
-      out += _convertElement(child, source);
-    }
-
-    // Do not include this parent element, added by parser
-    if (!sourceContainsParent) {
-      return out;
-    }
-
+    // Handle closing of the element
     if (!selfClosing) {
       out += '],';
     }
 
-    /// Add classes
+    // Add classes
     if (e.className.isNotEmpty) {
       if (classesAsList) {
         final classList = e.className.split(' ').map((e) => e.replaceAll(RegExp(r'\s+'), ' ').trim()).join("', '");
@@ -111,7 +102,7 @@ class JasprConverter {
       }
     }
 
-    /// Add styles as a raw map
+    // Add styles as a raw map
     if (e.attributes.containsKey('style')) {
       final rawStyle = e.attributes['style'].toString();
       final rawStyles = rawStyle.split(';');
@@ -127,6 +118,7 @@ class JasprConverter {
       }
     }
 
+    // Handle supported and unsupported attributes
     if (c != null) {
       final Map<String, String> unsupportedAttrMap = {};
 
@@ -153,34 +145,27 @@ class JasprConverter {
           continue;
         }
 
+        // Handle different attribute types
         if (attrSchema.type == 'Unit') {
-          // Unit
           final px = attr.value.toString().replaceAll('px', '');
           out += "${attrSchema.name}: Unit.pixels($px),";
         } else if (attrSchema.type == 'Color') {
           if (attr.value.startsWith('#')) {
-            // Color.hex
             out += "${attrSchema.name}: Color.hex('${attr.value}'),";
           } else {
-            // Color.named
             out += "${attrSchema.name}: Color.named('${attr.value}'),";
           }
         } else if (attrSchema.type == 'ButtonType') {
-          // ButtonType
           out += "${attrSchema.name}: ButtonType.${attr.value},";
         } else if (attrSchema.type == 'InputType') {
           if (attr.value == 'datetime') {
-            // InputType.date
             out += "${attrSchema.name}: InputType.date,";
           } else if (attr.value == 'datetime-local') {
-            // InputType.dateTimeLocal
             out += "${attrSchema.name}: InputType.dateTimeLocal,";
           } else {
-            // InputType.*
             out += "${attrSchema.name}: InputType.${attr.value},";
           }
         } else if (attrSchema.type == 'NumberingType') {
-          // NumberingType
           final typeMap = {
             'a': 'lowercaseLetters',
             'A': 'uppercaseLetters',
@@ -192,13 +177,10 @@ class JasprConverter {
             out += "${attrSchema.name}: NumberingType.${typeMap[attr.value]},";
           }
         } else if (attrSchema.type == 'boolean') {
-          // boolean
           out += "${attrSchema.name}: true,";
         } else if (attrSchema.type == 'int' || attrSchema.type == 'double') {
-          // int/double
           out += "${attrSchema.name}: ${attr.value},";
         } else {
-          // String
           out += "${attrSchema.name}: '${attr.value}',";
         }
       }
